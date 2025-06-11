@@ -1,5 +1,5 @@
 # Weather Telegram Bot
-
+Live Url - https://weather-update-bot.onrender.com
 A Telegram bot that provides weather updates with an admin panel for managing users and settings.
 
 ## Features
@@ -68,21 +68,4 @@ Features:
 - API key management
 - Bot settings configuration
 
-## Security
 
-- All admin routes are protected with authentication
-- Passwords are hashed using bcrypt
-- Session-based authentication
-- Environment variables for sensitive data
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
-
-## License
-
-This project is licensed under the MIT License. 
