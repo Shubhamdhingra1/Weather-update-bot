@@ -11,11 +11,13 @@ const User = require('./models/User');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const URL = process.env.WEBHOOK_URL;
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Session setup
 app.use(session({
@@ -34,12 +36,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Homepage route
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>🤖 Weather Update Telegram Bot is Running!</h1>
+    <p>To use this bot, open Telegram and search for your bot <b>@YourBotUsername</b>.</p>
+    <p><strong>Available Commands:</strong></p>
+    <ul>
+      <li><code>/start</code> - Start interacting with the bot</li>
+      <li><code>/subscribe</code> - Get daily weather updates</li>
+      <li><code>/unsubscribe</code> - Stop weather updates</li>
+      <li><code>/weather</code> - Get current weather at your location</li>
+    </ul>
+    <p>📍 Send your location in the chat for personalized forecasts.</p>
+  `);
+});
+
+// Admin routes
 const adminRoutes = require('./routes/admin');
 app.use('/admin', adminRoutes);
 
-// Telegram Bot Init
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+// Telegram Bot Setup
+const bot = new TelegramBot(TOKEN);
+
+// ✅ Only setup webhook if URL is defined
+if (URL) {
+  bot.setWebHook(`${URL}/bot${TOKEN}`)
+    .then(() => console.log('✅ Webhook set successfully'))
+    .catch(err => console.error('❌ Failed to set webhook:', err.message));
+
+  // Register webhook endpoint
+  app.post(`/bot${TOKEN}`, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+} else {
+  console.warn('⚠️ WEBHOOK_URL not set. Skipping webhook setup.');
+}
 
 // Telegram Handlers
 bot.onText(/\/start/, async (msg) => {
@@ -118,5 +151,5 @@ cron.schedule('0 8 * * *', async () => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
