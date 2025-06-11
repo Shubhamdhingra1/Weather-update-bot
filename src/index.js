@@ -60,19 +60,7 @@ app.use('/admin', adminRoutes);
 const bot = new TelegramBot(TOKEN);
 
 // ✅ Only setup webhook if URL is defined
-if (URL) {
-  bot.setWebHook(`${URL}/bot${TOKEN}`)
-    .then(() => console.log('✅ Webhook set successfully'))
-    .catch(err => console.error('❌ Failed to set webhook:', err.message));
 
-  // Register webhook endpoint
-  app.post(`/bot${TOKEN}`, (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-  });
-} else {
-  console.warn('⚠️ WEBHOOK_URL not set. Skipping webhook setup.');
-}
 
 // Telegram Handlers
 bot.onText(/\/start/, async (msg) => {
@@ -152,4 +140,17 @@ cron.schedule('0 8 * * *', async () => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  if (URL) {
+    bot.setWebHook(`${URL}/bot${TOKEN}`)
+      .then(() => console.log('✅ Webhook set successfully'))
+      .catch(err => console.error('❌ Failed to set webhook:', err.message));
+  
+    // Register webhook endpoint
+    app.post(`/bot${TOKEN}`, (req, res) => {
+      bot.processUpdate(req.body);
+      res.sendStatus(200);
+    });
+  } else {
+    console.warn('⚠️ WEBHOOK_URL not set. Skipping webhook setup.');
+  }
 });
