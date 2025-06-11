@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.send(`
     <h1>🤖 Weather Update Telegram Bot is Running!</h1>
-    <p>To use this bot, open Telegram and search for your bot <b>@YourBotUsername</b>.</p>
+    <p>To use this bot, open Telegram and search for <b>@myweather_update_bot</b>.</p>
     <p><strong>Available Commands:</strong></p>
     <ul>
       <li><code>/start</code> - Start interacting with the bot</li>
