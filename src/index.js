@@ -65,6 +65,7 @@ const bot = new TelegramBot(TOKEN);
 // Telegram Handlers
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
+
   const user = await User.findOneAndUpdate(
     { telegramId: chatId },
     {
@@ -76,29 +77,34 @@ bot.onText(/\/start/, async (msg) => {
     { upsert: true, new: true }
   );
 
-  bot.sendMessage(chatId, `Welcome to Weather Update Bot! 🌤
+  let message = `Welcome to Weather Update Bot! 🌤
 
 Available commands:
 /subscribe - Get daily weather updates
 /unsubscribe - Stop getting updates
-/weather - Get current weather
-📍 Send location to get personalized updates`);
+/weather - Get current weather`;
+
+  if (!user.location?.latitude || !user.location?.longitude) {
+    message += `\n\n📍 Please send your location so we can give accurate updates.`;
+  }
+
+  bot.sendMessage(chatId, message);
 });
 
 bot.onText(/\/subscribe/, async (msg) => {
   const chatId = msg.chat.id;
-  const user = await User.findOneAndUpdate({ telegramId: chatId }, { isSubscribed: true }, { new: true });
-  if (user?.location) {
-    bot.sendMessage(chatId, '✅ Subscribed! You will receive daily weather updates.');
-  } else {
-    bot.sendMessage(chatId, '✅ Subscribed! Please send your 📍 location so we can send accurate updates.');
-  }
-});
 
-bot.onText(/\/unsubscribe/, async (msg) => {
-  const chatId = msg.chat.id;
-  await User.findOneAndUpdate({ telegramId: chatId }, { isSubscribed: false });
-  bot.sendMessage(chatId, '❌ You have been unsubscribed from weather updates.');
+  const user = await User.findOneAndUpdate(
+    { telegramId: chatId },
+    { isSubscribed: true },
+    { new: true }
+  );
+
+  if (!user?.location?.latitude || !user?.location?.longitude) {
+    bot.sendMessage(chatId, '✅ Subscribed! 📍 Please send your location to start receiving accurate weather updates.');
+  } else {
+    bot.sendMessage(chatId, '✅ Subscribed! You will receive daily weather updates.');
+  }
 });
 
 bot.onText(/\/weather/, async (msg) => {
